@@ -40,7 +40,7 @@ class IndexView(BaseView):
                 "add_offset": results_per_page * offset_val,
             }
             if search_query:
-                kwargs.update({"search": search_query})
+                kwargs["search"] = search_query
 
             messages: List[custom.Message] = (
                 await self.client.get_messages(**kwargs)
@@ -86,13 +86,13 @@ class IndexView(BaseView):
         if offset_val:
             query = {"page": offset_val}
             if search_query:
-                query.update({"search": search_query})
+                query["search"] = search_query
             prev_page = {"url": str(req.rel_url.with_query(query)), "no": offset_val}
 
         if len(messages) == results_per_page:
             query = {"page": offset_val + 2}
             if search_query:
-                query.update({"search": search_query})
+                query["search"] = search_query
             next_page = {
                 "url": str(req.rel_url.with_query(query)),
                 "no": offset_val + 2,
@@ -109,7 +109,7 @@ class IndexView(BaseView):
             "title": "Index of " + chat["title"],
             "authenticated": req.app["is_authenticated"],
             "block_downloads": block_downloads,
-            "m3u_option": ""
-            if not req.app["is_authenticated"]
-            else f"{req.app['username']}:{req.app['password']}@",
+            "m3u_option": f"{req.app['username']}:{req.app['password']}@"
+            if req.app["is_authenticated"]
+            else "",
         }

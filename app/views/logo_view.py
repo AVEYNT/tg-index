@@ -46,7 +46,7 @@ class LogoView(BaseView):
                 )
                 im.save(logo_path)
             else:
-                pos = -1 if req.query.get("big", None) else int(len(photo.sizes) / 2)
+                pos = -1 if req.query.get("big", None) else len(photo.sizes) // 2
                 size: types.PhotoSize = self.client._get_thumb(photo.sizes, pos)
                 if isinstance(size, (types.PhotoCachedSize, types.PhotoStrippedSize)):
                     await self.client._download_cached_photo_size(size, logo_path)

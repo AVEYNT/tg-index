@@ -49,7 +49,7 @@ class ThumbnailView(BaseView):
             im.save(temp, "PNG")
             body = temp.getvalue()
         else:
-            thumb_pos = int(len(thumbnails) / 2)
+            thumb_pos = len(thumbnails) // 2
             try:
                 thumbnail: types.PhotoSize = self.client._get_thumb(
                     thumbnails, thumb_pos
