@@ -60,30 +60,28 @@ async def _do_cookies_auth_check(request: Request) -> Union[None, bool]:
 def middleware_factory() -> Coroutine:
     @middleware
     async def factory(request: Request, handler: Coroutine) -> Response:
-        if request.app["is_authenticated"] and str(request.rel_url.path) not in [
-            "/login",
-            "/logout",
-            "/favicon.ico",
-        ]:
-            url = request.app.router["login_page"].url_for()
-            if str(request.rel_url) != "/":
-                url = url.with_query(redirect_to=str(request.rel_url))
+        if not request.app["is_authenticated"] or str(
+            request.rel_url.path
+        ) in {"/login", "/logout", "/favicon.ico"}:
+            return await handler(request)
 
-            basic_auth_check_resp = _do_basic_auth_check(request)
+        url = request.app.router["login_page"].url_for()
+        if str(request.rel_url) != "/":
+            url = url.with_query(redirect_to=str(request.rel_url))
 
-            if basic_auth_check_resp is True:
-                return await handler(request)
+        basic_auth_check_resp = _do_basic_auth_check(request)
 
-            cookies_auth_check_resp = await _do_cookies_auth_check(request)
+        if basic_auth_check_resp is True:
+            return await handler(request)
 
-            if cookies_auth_check_resp is not None:
-                return await handler(request)
+        cookies_auth_check_resp = await _do_cookies_auth_check(request)
 
-            if isinstance(basic_auth_check_resp, Response):
-                return basic_auth_check_resp
+        if cookies_auth_check_resp is not None:
+            return await handler(request)
 
-            return HTTPFound(url)
+        if isinstance(basic_auth_check_resp, Response):
+            return basic_auth_check_resp
 
-        return await handler(request)
+        return HTTPFound(url)
 
     return factory

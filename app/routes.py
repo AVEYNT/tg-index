@@ -15,7 +15,7 @@ def get_common_routes(handler: Views, alias_id: str) -> List[RouteDef]:
     p = "/{chat:" + alias_id + "}"
     return [
         web.get(p, handler.index, name=f"index_{alias_id}"),
-        web.get(p + r"/logo", handler.logo, name=f"logo_{alias_id}"),
+        web.get(f"{p}/logo", handler.logo, name=f"logo_{alias_id}"),
         web.get(p + r"/{id:\d+}/view", handler.info, name=f"info_{alias_id}"),
         web.get(
             p + r"/{id:\d+}/thumbnail",

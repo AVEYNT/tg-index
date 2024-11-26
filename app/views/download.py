@@ -22,7 +22,7 @@ class Download(BaseView):
         self, req: web.Request, head: bool = False
     ) -> web.Response:
         if block_downloads:
-            return web.Response(status=403, text="403: Forbiden" if not head else None)
+            return web.Response(status=403, text=None if head else "403: Forbiden")
 
         file_id = int(req.match_info["id"])
         alias_id = req.match_info["chat"]
@@ -41,10 +41,11 @@ class Download(BaseView):
             log.debug(f"no result for {file_id} in {chat_id}")
             return web.Response(
                 status=410,
-                text="410: Gone. Access to the target resource is no longer available!"
-                if not head
-                else None,
+                text=None
+                if head
+                else "410: Gone. Access to the target resource is no longer available!",
             )
+
 
         media = message.media
         size = message.file.size
@@ -59,9 +60,10 @@ class Download(BaseView):
         except ValueError:
             return web.Response(
                 status=416,
-                text="416: Range Not Satisfiable" if not head else None,
+                text=None if head else "416: Range Not Satisfiable",
                 headers={"Content-Range": f"bytes */{size}"},
             )
+
 
         if not head:
             body = self.client.download(media, size, offset, limit)
